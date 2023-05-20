@@ -1,0 +1,220 @@
+package com.fraporitmostech.kotflix
+    data class MovieResponse(
+      val estreno: List<Movie>,
+      val terror: List<Movie>
+    )
+    data class Movie(
+       val description: String,
+       val id: Int,
+       val photo: String,
+      val title: String,
+      val url: String,
+      val year: Int
+    package com.fraporitmostech.kotflix
+  interface OnClickListener {
+    fun onClick(movie: Movie){
+      //TODO: aqui puedes implementar acciones de onClick
+    }
+  }
+  package com.fraporitmostech.kotflix
+   import android.content.Context
+   import android.view.LayoutInflater
+   import android.view.View
+   import android.view.ViewGroup
+   import androidx.recyclerview.widget.RecyclerView
+   import com.bumptech.glide.Glide
+   import com.bumptech.glide.load.engine.DiskCacheStrategy
+  import com.fraporitmostech.kotflix.databinding.ItemMovieBinding
+    class AdapterMovie(private val movie: List<Movie>, private val listener: OnClickListener)
+        :RecyclerView.Adapter<AdapterMovie.ViewHolder>(){
+          private  lateinit var context: Context
+            inner  class ViewHolder(view: View):RecyclerView.ViewHolder(view){
+                val binding = ItemMovieBinding.bind(view)
+                fun setListener(movie: Movie){
+                    binding.ivMovie.setOnClickListener {
+                        listener.onClick(movie)
+                    }
+                }
+            }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            context = parent.context
+            val view = LayoutInflater.from(context).inflate(R.layout.item_movie,parent,false)
+            return  ViewHolder(view)
+        }
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val movie = movie.get(position)
+            with(holder){
+                Glide.with(context)
+                    .load(movie.photo)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .centerCrop()
+                    .into(binding.ivMovie)
+                setListener(movie)
+            }
+        }
+        override fun getItemCount(): Int  = movie.size
+        package com.fraporitmostech.kotflix
+  import okhttp3.OkHttpClient
+  import okhttp3.logging.HttpLoggingInterceptor
+  import retrofit2.Retrofit
+  import retrofit2.converter.gson.GsonConverterFactory
+  class Connection {
+        companion object Servicio{
+            fun ResponseEngine(): Retrofit{
+                val interceptor = HttpLoggingInterceptor()
+                interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+                val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+                val retrofit = Retrofit.Builder()
+                    .baseUrl("https://my-json-server.typicode.com/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(client)
+                    .build()
+                return  retrofit
+            }
+        }
+    }
+    paquete com . fraporitmostech . kotflix 
+  retroadaptación de importación2 . Respuesta
+  retroadaptación de importación2 . http _ CONSEGUIR
+  puntos finales de la interfaz {  
+      @ GET ( "/FranEspino/demo/db" )
+      suspender fun getDataMovies ( ) : Respuesta < MovieResponse
+      paquete com . fraporitmostech . kotflix
+   importar android . contenido _ Intención
+   importar androidx . compatibilidad de aplicaciones aplicación _ AppCompatActivityAppCompatActivity
+   importar android . os _ Manojo
+   importar android . útil _ Registro
+   importar android . artilugio _ Tostada
+   importar androidx . vista del reciclador . artilugio _ LinearLayoutManagerLinearLayoutManager
+   importar com . fraporitmostech . kotflix . enlace de datos ActivityMainBinding
+  importar kotlinx . corrutinas _ Despachadores
+  importar kotlinx . corrutinas _ Alcance global
+  importar kotlinx . corrutinas _ lanzamiento
+  retroadaptación de importación2 . Respuesta
+  clase MainActivity : AppCompatActivity ( ) , OnClickListener {     
+      privado lateinit var adaptadorPremier : AdapterMovie 
+      privado lateinit var adaptadorHorror : AdapterMovie 
+      private var listPremierMovie = mutableListOf < Película > ( ) 
+      private var listHorrorMovie = mutableListOf < Película > ( ) 
+      privado lateinit var mBinding : ActivityMainBinding 
+      anula la diversión onCreate ( guardadoInstanceState : ¿ Paquete ? ) { 
+          súper _ onCreate ( estado de instancia guardado )
+          mBinding = ActivityMainBinding . inflar ( diseñoInflador ) 
+          setContentView ( mBinding . raíz )
+          Alcance Global . lanzamiento ( Despachadores . IO ) { 
+              servicio val : puntos finales = conexión . Motor de respuesta ( ) . crear ( Puntos finales :: clase . Java )   
+              val respuesta : Respuesta <MovieResponse> = servicio . _ obtener películas de datos ( )  
+              ejecutarOnUiThread {
+                  if ( respuesta . tiene éxito ) {  
+                      para ( pelicula en respuesta . cuerpo ( ) !! . estreno ) { _  
+                          listaPremierMovie . agregar ( pelicula )
+                          adaptadorPremier = AdapterMovie ( listPremierMovie , this @ MainActivity )  
+                          mEncuadernación . rvPremiere . aplicar { 
+                              adaptador = adaptador Premier
+                              layoutManager = LinearLayoutManager ( 
+                                  esta @ActividadPrincipal , _
+                                  LinearLayoutManager . HORIZONTALES ,
+                                  FALSO
+                              )
+                          }
+                      }
+                      for ( pelicula en respuesta . body ( ) ! ! . terror ) {  
+                          Lista de películas de terror . agregar ( pelicula )
+                          adaptadorHorror = AdapterMovie ( listHorrorMovie , this @ MainActivity )  
+                          mEncuadernación . rvHorror . aplicar { 
+                              adaptador = adaptadorHorror
+                              layoutManager = LinearLayoutManager ( 
+                                  esta @ActividadPrincipal , _
+                                  LinearLayoutManager . HORIZONTALES ,
+                                  FALSO
+                              )
+                          }
+                      }
+                  }
+              }
+          }
+        }
+        anular diversión onClick ( película : Película ) { 
+            súper _ onClick ( película )
+            val intent = Intent ( baseContext , PlaymovieActivity :: class . java )  
+            intento _ putExtra ( "url" , película . url )
+            startActivity ( intención )
+            tostadas _ makeText ( baseContext , movie . title , Toast . LENGTH_SHORT ) . mostrar ( ) 
+        }
+    }   
+paquete com . fraporitmostech . kotflix
+   importar android . anotación _ suprimir pelusa
+   importar android . contenido _ p. m . Información de actividad
+   importar android . neto _ uri
+   importar androidx . compatibilidad de aplicaciones aplicación _ AppCompatActivityAppCompatActivity
+   importar android . os _ Manojo
+   importar android . ver _ Vista
+   importar android . ver _ Administrador de ventanas
+  importar com . googlear _ androide _ exojugador2 . elemento multimedia
+  importar com . googlear _ androide _ exojugador2 . SimpleExoPlayer
+  importar com . googlear _ androide _ exojugador2 . fuente _ fuente de medios
+  importar com . googlear _ androide _ exojugador2 . fuente _ ProgressiveMediaFuente
+  importar com . googlear _ androide _ exojugador2 . ui _ PlayerView
+  importar com . googlear _ androide _ exojugador2 . río arriba Fuente de datos
+  importar com . googlear _ androide _ exojugador2 . río arriba DefaultHttpDataSource
+  importar com . googlear _ androide _ exojugador2 . útil _ útil
+  clase PlaymovieActivity : AppCompatActivity ( ) {    
+      privado lateinit var uri : Uri 
+      privado var mPlayer : SimpleExoPlayer ? = nulo    
+      privado lateinit var playerView : PlayerView 
+      anula la diversión onCreate ( guardadoInstanceState : ¿ Paquete ? ) { 
+          súper _ onCreate ( estado de instancia guardado )
+          setContentView ( R. diseño . actividad_playmovie ) _
+          ventana _ establecer banderas (
+              Administrador de ventanas . Parámetros de diseño . FLAG_PANTALLA COMPLETA ,
+              Administrador de ventanas . Parámetros de diseño . FLAG_PANTALLA COMPLETA
+          )
+          Orientación solicitada = ActivityInfo . PANTALLA_ORIENTACION_PAISAJE ; 
+          url de valor : cadena = intención . getStringExtra ( "URL" ) . a la cadena ( ) 
+          playerView = findViewById ( R. id . video_view ) _ 
+          uri = uri . analizar ( url ) 
+          jugador de inicio ( )
+      }
+      diversión privada initPlayer ( ) { 
+          ocultarUiSistema ( )
+          mPlayer = SimpleExoPlayer . Constructor ( este ) . construir ( ) 
+          vista del jugador . jugador = mJugador
+          mjugador ! ! . jugarCuandoListo = verdadero 
+          mjugador ! ! . setMediaSource ( compilarMediaSource ( ) )
+          mjugador ! ! . preparar ( )
+      }
+      diversión privada buildMediaSource ( ) : MediaSource {  
+          val dataSourceFactory : DataSource . Fábrica = DefaultHttpDataSource . Fábrica ( )   
+          val MediaSource : MediaSource = ProgressiveMediaSource . Fábrica ( fábrica de origen de datos )   
+              . createMediaSource ( Elemento multimedia . fromUri ( uri ) )
+          volver mediaSource
+      }
+      diversión de anulación pública onPause ( ) { 
+          súper _ en pausa ( )
+          if ( Util . SDK_INT < 24 ) {    
+              liberarJugador ( )
+          }
+      }
+      diversión de anulación pública onStop ( ) { 
+          súper _ en Parar ( )
+          if ( Util . SDK_INT >= 24 ) {    
+              liberarJugador ( )
+          }
+      }
+      diversión privada releasePlayer ( ) { 
+          mPlayer ?. correr {
+              playWhenReady = esto . jugar cuando esté listo 
+              soltar ( )
+          }
+          mPlayer = nulo 
+      }
+      @ SuppressLint ( "InlinedApi" )
+      diversión privada hideSystemUi ( ) { 
+          vista del jugador . systemUiVisibility = ( Ver . SYSTEM_UI_FLAG_LOW_PROFILE  
+                  o Ver . SYSTEM_UI_FLAG_PANTALLA COMPLETA
+                  o Ver . SYSTEM_UI_FLAG_LAYOUT_STABLE
+                  o Ver . SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                  o Ver . SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                  o Ver . SYSTEM_UI_FLAG_HIDE_NAVIGATION )
+      }
+  }
